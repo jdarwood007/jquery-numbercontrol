@@ -1,11 +1,24 @@
 ;(function ($) {
     "use strict"
-    $.fn.numbercontrol = function (methodOrProps) {
-        if (methodOrProps === "destroy") {
-            this.each(function () {
-                this.destroyInputSpinner()
+	$.fn.numbercontrol = function (methodOrProps) {
+		if (methodOrProps === "destory") {
+			this.each(function () {
+				$(this).parent().children().each(function (index, value) {
+					var thisSelector = $(value);
+
+					if (options.onBeforeDestoryInitialize !== undefined)
+						options.onBeforeDestoryInitialize(this);
+
+					if (!thisSelector.is('input'))
+						thisSelector.remove();
+
+					if (options.onAfterDestoryInitialize !== undefined)
+						options.onAfterDestoryInitialize(this);
+				});
+
+				$(this).parent().removeClass().addClass('numberControlDestoryed');
             })
-            return this
+            return this;
         }
 
 		// Allow customizing the options.
@@ -14,8 +27,9 @@
         	separator: '.',
         	type: "number",
         	prependHtml: '<div class="input-group-prepend"><button class="btn btn-decrease btn-outline-secondary px-1"><span class="oi oi-minus" /></button></div>',
-        	appendHtml: '<div class="input-group-append"><button class="btn btn-increase btn-outline-secondary px-1"><span class="oi oi-plus" /></button></div>',
-        	inputWrap: '<div class="input-group numberControl"></div>',
+			appendHtml: '<div class="input-group-append"><button class="btn btn-increase btn-outline-secondary px-1"><span class="oi oi-plus" /></button></div>',
+			inputParentCss: 'input-group numberControl',
+        	inputParent: 'div',
         	inputCss: 'numberControlInput form-control px-1',
         	bindButtonEvents: 'click tap touch touchstart',
         	keyboardLanguage: {
@@ -34,10 +48,16 @@
 
 		function setNewValue(container, value)
 		{
+			if (options.onBeforeSetNewvalue !== undefined)
+				options.onBeforeSetNewvalue(this, event, container, value);
+
 			if (options.type === 'number')
 				$(container).val(parseInt(value));
 			else
 				$(container).val(parseFloat(value));
+
+			if (options.onAfterSetNewvalue !== undefined)
+				options.onAfterSetNewvalue(this, event, container, value);
 		}
 
 		function findMinMaxValue()
@@ -70,8 +90,11 @@
 			var $maxValue = findMinMaxValue(options.max, $base.attr('max'), Number.MAX_VALUE);
 
 			// Build the parent up. 
-			$base.wrap(options.inputWrap);
+			if (!$($base).parent().is('div') || !$($base).parent().hasClass('numberControlDestoryed')) {
+				$base.wrap('<' + options.inputParent + '></' + options.inputParent + '>');
+            }
 			var $parent = $base.parent(options.parentSelector);
+			$parent.removeClass().addClass(options.inputParentCss);
 
 			// Set the base.
 			$base.attr('type', options.type);
@@ -80,7 +103,7 @@
 			// Wrap the buttons around.			
 			$base.before(options.prependHtml);
 			$base.after(options.appendHtml);
-			
+
 			// Add the style to the body to cleanup input controls for number.
 			if (options.type == 'number' && !options.DisableNumberSpinStyleFix)
 				$('body').append('<style>' +
@@ -92,6 +115,8 @@
 			// The decrease event.
 			var $decreaseButton = $parent.find('.btn-decrease');
 			$decreaseButton.on(options.bindButtonEvents, function (event) {
+				event.preventDefault();
+
 				if (options.onBeforeClickDecrease !== undefined)
 					options.onBeforeClickDecrease(this, event);
 				if ($base.val() > $minValue)
@@ -105,6 +130,8 @@
 			// The increase event.
 			var $decreaseButton = $parent.find('.btn-increase');
 			$decreaseButton.on(options.bindButtonEvents, function (event) {
+				event.preventDefault();
+
 				if (options.onBeforeClickIncrease !== undefined)
 					options.onBeforeClickIncrease(this, event);
 				if ($base.val() < $maxValue)
@@ -185,6 +212,8 @@
 
 					// Bind the virtual Keyboard action.
 					$VirtualKeyboard.find('.numberControlVirtualNumPad').on(options.bindButtonEvents, function(event){						
+						event.preventDefault();
+
 						if (options.debug) console.log('numbercontrl: numberControlVirtualNumPad: Click', event, $base.val(), $VirtualKeyboardInput.val().toString(), $(this).attr('data-function'));
 
 						var thisFunction = $(this).attr('data-function');
