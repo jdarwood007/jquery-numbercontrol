@@ -1,7 +1,33 @@
-;(function ($) {
-    "use strict"
+(function (factory) {
+	if (typeof define === 'function' && define.amd) {
+		// AMD. Register as an anonymous module.
+		define(['jquery'], factory);
+	} else if (typeof module === 'object' && module.exports) {
+		// Node/CommonJS
+		module.exports = function( root, jQuery ) {
+			if ( jQuery === undefined ) {
+				// require('jQuery') returns a factory that requires window to
+				// build a jQuery instance, we normalize how we use modules
+				// that require this pattern but the window provided is a noop
+				// if it's defined (how jquery works)
+				if ( typeof window !== 'undefined' ) {
+					jQuery = require('jquery');
+				}
+				else {
+					jQuery = require('jquery')(root);
+				}
+			}
+			factory(jQuery);
+			return jQuery;
+		};
+	} else {
+		// Browser globals
+		factory(jQuery);
+	}
+}(function ($) {
+	'use strict'
 	$.fn.numbercontrol = function (methodOrProps) {
-		if (methodOrProps === "destory") {
+		if (methodOrProps === 'destory') {
 			this.each(function () {
 				$(this).parent().children().each(function (index, value) {
 					var thisSelector = $(value);
@@ -17,34 +43,34 @@
 				});
 
 				$(this).parent().removeClass().addClass('numberControlDestoryed');
-            })
-            return this;
-        }
+			})
+			return this;
+		}
 
 		// Allow customizing the options.
-        var options = {
-        	debug: false,
-        	separator: '.',
-        	type: "number",
-        	prependHtml: '<div class="input-group-prepend"><button class="btn btn-decrease btn-outline-secondary px-1"><span class="oi oi-minus" /></button></div>',
+		var options = {
+			debug: false,
+			separator: '.',
+			type: 'number',
+			prependHtml: '<div class="input-group-prepend"><button class="btn btn-decrease btn-outline-secondary px-1"><span class="oi oi-minus" /></button></div>',
 			appendHtml: '<div class="input-group-append"><button class="btn btn-increase btn-outline-secondary px-1"><span class="oi oi-plus" /></button></div>',
 			inputParentCss: 'input-group numberControl',
-        	inputParent: 'div',
-        	inputCss: 'numberControlInput form-control px-1',
-        	bindButtonEvents: 'click tap touch touchstart',
-        	keyboardLanguage: {
-        		'UP' : '<span class="oi oi-chevron-top" />',
-        		'DOWN' : '<span class="oi oi-chevron-bottom" />',
-        		'INVERSE' : '<span class="oi oi-transfer" />',
-        		'SEP' : '<span class="oi oi-media-record" />',
-        	},
-        	keyboardControl: {
-        	},
+			inputParent: 'div',
+			inputCss: 'numberControlInput form-control px-1',
+			bindButtonEvents: 'click tap touch touchstart',
+			keyboardLanguage: {
+				'UP' : '<span class="oi oi-chevron-top" />',
+				'DOWN' : '<span class="oi oi-chevron-bottom" />',
+				'INVERSE' : '<span class="oi oi-transfer" />',
+				'SEP' : '<span class="oi oi-media-record" />',
+			},
+			keyboardControl: {
+			},
 			buttons: [...Array(10).keys(), 'DELETE', 'CLEAR', 'DONE', 'CANCEL', 'UP', 'DOWN', 'SEP', 'INVERSE']
-        }
-        for (var option in methodOrProps) {
-            options[option] = methodOrProps[option]
-        }
+		}
+		for (var option in methodOrProps) {
+			options[option] = methodOrProps[option]
+		}
 
 		function setNewValue(container, value)
 		{
@@ -78,11 +104,11 @@
 		}
 
 		// Bind to each input selector
-        this.each(function () {
+		this.each(function () {
 			if (options.onBeforeInitialized !== undefined)
 				options.onBeforeInitialized(this);
 
-            var $base = $(this);
+			var $base = $(this);
 
 			// Some settings we either can pull in from a options, from standard attributes or defaults.
 			var $step = findMinMaxValue(parseFloat(options.step), parseFloat($base.attr('step')), 1);
@@ -92,7 +118,7 @@
 			// Build the parent up. 
 			if (!$($base).parent().is('div') || !$($base).parent().hasClass('numberControlDestoryed')) {
 				$base.wrap('<' + options.inputParent + '></' + options.inputParent + '>');
-            }
+			}
 			var $parent = $base.parent(options.parentSelector);
 			$parent.removeClass().addClass(options.inputParentCss);
 
@@ -128,8 +154,8 @@
 			});
 
 			// The increase event.
-			var $decreaseButton = $parent.find('.btn-increase');
-			$decreaseButton.on(options.bindButtonEvents, function (event) {
+			var $increaseButton = $parent.find('.btn-increase');
+			$increaseButton.on(options.bindButtonEvents, function (event) {
 				event.preventDefault();
 
 				if (options.onBeforeClickIncrease !== undefined)
@@ -145,6 +171,8 @@
 			// The Popup Numberpad
 			if (!options.disableVirtualKeyboard)
 			{
+				var $KeyboardLayout;
+
 				if (options.onBeforeVirtualKeyboardInitalized !== undefined)
 					options.onBeforeVirtualKeyboardInitalized(this);
 
@@ -157,9 +185,9 @@
 					var $location = options.virtualKeyboardAttachSelector ? $(options.virtualKeyboardAttachSelector) : $base;
 
 					if (options.keyboardLayout)
-						var $KeyboardLayout = options.keyboardLayout;
+						$KeyboardLayout = options.keyboardLayout;
 					else
-						var $KeyboardLayout = 
+						$KeyboardLayout = 
 							'<div class="modal-dialog modal-dialog-centered" style="width: 250px;">' +
 								'<div class="modal-content">' +
 									'<table>' +
@@ -192,9 +220,9 @@
 						;
 
 					// Fill out the input.
-					if (typeof options.keyboardControl["INPUTBOX"] === 'undefined')
-						options.keyboardControl["INPUTBOX"] = '<input class="numberControlVirtualNumPad numberControlVirtualNumPadINPUT form-control" type="text" readonly value="{VAL}"/>';
-					$KeyboardLayout = $KeyboardLayout.replace('{INPUTBOX}', options.keyboardControl["INPUTBOX"].replace('{VAL}', $base.val()).toString());
+					if (typeof options.keyboardControl['INPUTBOX'] === 'undefined')
+						options.keyboardControl['INPUTBOX'] = '<input class="numberControlVirtualNumPad numberControlVirtualNumPadINPUT form-control" type="text" readonly value="{VAL}"/>';
+					$KeyboardLayout = $KeyboardLayout.replace('{INPUTBOX}', options.keyboardControl['INPUTBOX'].replace('{VAL}', $base.val()).toString());
 
 					// Fill out all buttons.
 					$.each(options.buttons, function(i, v){
@@ -225,13 +253,12 @@
 						{
 							case 'DELETE':
 								$VirtualKeyboardInput.val($VirtualKeyboardInput.val().toString().slice(0, -1));
-							break;
+								break;
 							
 							case 'CLEAR':
-								$VirtualKeyboardInput.val("");
-							break;
+								$VirtualKeyboardInput.val('');
+								break;
 							
-							// Done break.
 							case 'DONE':
 								if ($VirtualKeyboardInput.val() > $maxValue)
 									setNewValue($base, $maxValue);
@@ -239,28 +266,32 @@
 									setNewValue($base, $minValue);
 								else
 									setNewValue($base, $VirtualKeyboardInput.val());
+								
+								$VirtualKeyboard.remove();
+								break;
+
 							case 'CANCEL':
 								$VirtualKeyboard.remove();
-							break;
+								break;
 							
 							case 'UP':
 								if ($VirtualKeyboardInput.val() < $maxValue)
 									setNewValue($VirtualKeyboardInput, parseFloat($VirtualKeyboardInput.val()) + parseFloat($step));
-							break;
+								break;
 							
 							case 'DOWN':
 								if ($VirtualKeyboardInput.val() > $minValue)
 									setNewValue($VirtualKeyboardInput, parseFloat($VirtualKeyboardInput.val()) - parseFloat($step));
-							break;
+								break;
 
 							case 'SEP':
 								if ($VirtualKeyboardInput.val().toString().indexOf(options.separator) === -1)
 									$VirtualKeyboardInput.val($VirtualKeyboardInput.val().toString() + options.separator);
-							break;
+								break;
 
 							case 'INVERSE':
 								setNewValue($VirtualKeyboardInput, parseFloat($VirtualKeyboardInput.val()) * -1);
-							break;
+								break;
 														
 							// Default to assume its numbers.
 							default:
@@ -286,6 +317,5 @@
 				options.onAfterInitialized(this);
 			if (options.debug) console.log($base.parent());
 		});
-}
-
-}(jQuery));
+	}
+}));
