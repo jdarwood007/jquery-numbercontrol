@@ -57,7 +57,7 @@
 			inputParentCss: 'input-group numberControl',
 			inputParent: 'div',
 			inputCss: 'numberControlInput form-control px-1',
-			bindButtonEvents: 'click tap touch touchstart',
+			bindButtonEvents: 'click tap touch touchstart focus',
 			keyboardLanguage: {
 				'UP' : '<span class="oi oi-chevron-top" />',
 				'DOWN' : '<span class="oi oi-chevron-bottom" />',
@@ -86,6 +86,29 @@
 				options.onAfterSetNewvalue(this, event, container, value);
 		}
 
+		// https://stackoverflow.com/questions/9553354/how-do-i-get-the-decimal-places-of-a-floating-point-number-in-javascript
+		function precision(a)
+		{
+			if (!isFinite(a))
+				return 0;
+
+			var e = 1, p = 0;
+			while (Math.round(a * e) / e !== a)
+			{
+				e *= 10;
+				p++;
+			}
+
+			return parseInt(p);
+		}
+
+		function FindPercision(v, p)
+		{
+			if (!isFinite(v))
+				return 0;
+			return parseInt(v).toString().length + p;
+		}
+
 		function findMinMaxValue()
 		{
 			var testValue;
@@ -112,6 +135,7 @@
 
 			// Some settings we either can pull in from a options, from standard attributes or defaults.
 			var $step = findMinMaxValue(parseFloat(options.step), parseFloat($base.attr('step')), 1);
+			var $percision = precision($step) + 1;
 			var $minValue = findMinMaxValue(options.min, $base.attr('min'), Number.MIN_VALUE);
 			var $maxValue = findMinMaxValue(options.max, $base.attr('max'), Number.MAX_VALUE);
 
@@ -146,11 +170,11 @@
 				if (options.onBeforeClickDecrease !== undefined)
 					options.onBeforeClickDecrease(this, event);
 				if ($base.val() > $minValue)
-					setNewValue($base, parseFloat($base.val()) - parseFloat($step));
+					setNewValue($base, parseFloat(parseFloat($base.val()) - parseFloat($step)).toPrecision(FindPercision($base.val(), $percision)));
 				if (options.onAfterClickDecrease !== undefined)
 					options.onAfterClickDecrease(this, event);
 				if (options.debug)
-					console.log('numbercontrl: decreaseButton: Click', event, $base.val(), $minValue);
+					console.log('numbercontrl: decreaseButton: Click', event, parseFloat($base.val()), $minValue, parseFloat($step));
 			});
 
 			// The increase event.
@@ -161,11 +185,11 @@
 				if (options.onBeforeClickIncrease !== undefined)
 					options.onBeforeClickIncrease(this, event);
 				if ($base.val() < $maxValue)
-					setNewValue($base, parseFloat($base.val()) + parseFloat($step));
+					setNewValue($base, parseFloat(parseFloat($base.val()) + parseFloat($step)).toPrecision(FindPercision($base.val(), $percision)));
 				if (options.onAfterClickIncrease !== undefined)
 					options.onAfterClickIncrease(this, event);
 				if (options.debug)
-					console.log('numbercontrl: increaseButton: Click', event, $base.val(), $minValue);
+					console.log('numbercontrl: increaseButton: Click', event, parseFloat($base.val()), $maxValue, parseFloat($step));
 			});
 
 			// The Popup Numberpad
