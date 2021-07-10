@@ -27,23 +27,24 @@
 }(function ($) {
 	'use strict'
 	$.fn.numbercontrol = function (methodOrProps) {
-		if (methodOrProps === 'destory') {
+		if (methodOrProps === 'destory' || (typeof methodOrProps === 'object' && methodOrProps.destroy !== undefined)) {
 			this.each(function () {
 				$(this).parent().children().each(function (index, value) {
 					var thisSelector = $(value);
 
-					if (options.onBeforeDestoryInitialize !== undefined)
+					if (typeof options === 'object' && options.onBeforeDestoryInitialize !== undefined)
 						options.onBeforeDestoryInitialize(this);
 
 					if (!thisSelector.is('input'))
 						thisSelector.remove();
 
-					if (options.onAfterDestoryInitialize !== undefined)
+					if (typeof options === 'object' && options.onAfterDestoryInitialize !== undefined)
 						options.onAfterDestoryInitialize(this);
 				});
 
 				$(this).parent().removeClass().addClass('numberControlDestoryed');
-			})
+			});
+
 			return this;
 		}
 
@@ -76,6 +77,10 @@
 		{
 			if (options.onBeforeSetNewvalue !== undefined)
 				options.onBeforeSetNewvalue(this, event, container, value);
+
+			// The Min value was hit with nothing in the container, which could most likely be a blank string that was converted to a int.
+			if (Number.MIN_VALUE == parseFloat(value) && $(container).val() == '')
+				return false;
 
 			if (options.type === 'number')
 				$(container).val(parseInt(value));
