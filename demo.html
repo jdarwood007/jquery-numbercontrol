@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+	<title>JQuery Number Control with Virtual Keyboard</title>
+	<meta name="robots" content="noindex, nofollow">
+	<meta name="googlebot" content="noindex, nofollow">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/open-iconic/1.1.1/font/css/open-iconic-bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="./jquery-numbercontrol.css">
+</head>
+<body>
+	<ul class="nav nav-tabs mb-5">
+		<li class="nav-item">
+			<a class="nav-link active" data-tab="default">Default</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-tab="decimal">Decimal</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-tab="setvalue">Set Value</a>
+		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-tab="highlight">Highlight</a>
+		</li>
+	</ul>
+
+	<div id="content_containers">
+		<!-- Default number contorls -->
+		<div id="viewbox_default">
+			<div class="col-sm-2">	
+				<input type="text" id="numbercontrol_default" value="0" min="-500" max="500" />
+			</div>
+		</div>
+
+		<!-- Decimal example -->
+		<div id="viewbox_decimal" style="display:none;">
+			<div class="col-sm-2">	
+				<input type="text" id="numbercontrol_decimal" value="0" min="-10" max="10" step="0.01" />
+			</div>
+		</div>
+
+		<!-- Save another field exmaple -->
+		<div id="viewbox_setvalue" style="display:none;">
+			<div class="row">
+				<div class="col-sm-2">	
+					<input type="number" id="numbercontrol_setvalue" value="" min="-500" max="500" />
+				</div>
+				<div class="col-sm-2 offset-sm-2">
+					<span id="setvalue_setbox"></span>
+				</div>
+			</div>
+		</div>
+
+		<!-- Highlight field exmaple -->
+		<div id="viewbox_highlight" style="display:none;">
+			<div class="col-sm-2">	
+				<input type="text" id="numbercontrol_highlight" value="" />
+				<datalist id="datalist_highlight">
+					<option value="101A">101A</option>
+					<option value="102A">102A</option>
+					<option value="102B">102B</option>
+					<option value="103A">103A</option>
+					<option value="103B">103B</option>
+					<option value="201A">201A</option>
+					<option value="201B">201B</option>
+					<option value="202A">202A</option>
+					<option value="203A">203A</option>
+					<option value="204A">204A</option>
+					<option value="205A">205A</option>
+					<option value="207A">207A</option>
+					<option value="209B">209B</option>
+				</datalist>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script type="text/javascript" src="./jquery-numbercontrol.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			// Not apart of the Number controls, but does the tabs.
+			$('ul.nav a.nav-link').on('click', function(e) {
+				$('ul.nav a.nav-link').removeClass('active')
+				$(this).addClass('active');
+				
+				$('#content_containers > div').css('display', 'none');
+				$('#content_containers > div#viewbox_' + $(this).data('tab')).css('display', '');
+			});
+
+			// The default number controls.
+			$('#numbercontrol_default').numbercontrol();
+			
+			// Fancy box for decimals.
+			$('#numbercontrol_decimal').numbercontrol({
+				'type': 'float',
+				'prependHtml': '',
+				'appendHtml': '',
+				'keyboardLayout': '<div class="modal-dialog modal-dialog-centered" style="width: 250px;">' +
+						'<div class="modal-content">' +
+							'<table>' +
+								'<tr>' +
+									'<td colspan="4">{INPUTBOX}</td>' +
+								'</tr><tr>' +
+									'<td>{7}</td>' +
+									'<td>{8}</td>' +
+									'<td>{9}</td>' +
+									'<td>{DELETE}</td>' +
+								'</tr><tr>' +
+									'<td>{4}</td>' +
+									'<td>{5}</td>' +
+									'<td>{6}</td>' +
+									'<td>{CLEAR}</td>' +
+								'</tr><tr>' +
+									'<td>{1}</td>' +
+									'<td>{2}</td>' +
+									'<td>{3}</td>' +
+									'<td>{DONE}</td>' +
+								'</tr><tr>' +
+									'<td colspan="2">{0}</td>' +
+									'<td>{SEP}</td>' +
+									'<td>{CANCEL}</td>' +
+								'</tr>' +
+							'</table>' +
+						'</div>' +
+					'</div>'
+			});
+			
+			// Save our value to another box/notify something else.
+			$('#numbercontrol_setvalue').numbercontrol({
+				'onAfterSetNewvalue': function (that, event, container, value) {
+					$('#setvalue_setbox').html(value);
+				}
+			});
+
+
+			// Example of how we can do a filtered highlight list for example of a room list.			
+			function filterRoomList(dataselector, value)
+			{
+				if (typeof value === 'undefined')
+            		value = $('#numbercontrol_highlight').val();
+
+				var options = $(dataselector).find('option');
+				var optionVals = [], i = 0;
+
+				for (i; i < options.length; i += 1) {
+					optionVals.push(options[i].value);
+				}
+
+				if (value.length > -1) {
+					optionVals = optionVals.filter(function (element, index, array) {
+						if (value == element.substring(0, value.length)) {
+							return true;
+						}
+						return false;
+					});
+				}
+
+				var IDs = optionVals.map((optionVals) => optionVals[value.length]).join('');
+				var IDsUnique = [...new Set(IDs)];
+
+				$('.numberControlVirtualNumPad td > button').removeClass('btn-primary').addClass('btn-outline-secondary');
+				IDsUnique.forEach(function (index, number) {
+					$('td#kv' + index + ' > button').addClass('btn-primary').removeClass('btn-outline-secondary');
+				});
+    		}
+			$('#numbercontrol_highlight').numbercontrol({
+				'type': 'text',
+				'prependHtml': '',
+				'appendHtml': '',
+				'bindButtonEvents': 'click tap touch',
+				'buttons': [...Array(10).keys(), 'DELETE', 'CLEAR', 'DONE', 'CANCEL', 'UP', 'DOWN', 'SEP', 'INVERSE', 'A', 'B', 'C'],
+				'onAfterVirtualKeyboardOpen': function () {
+					filterRoomList('#datalist_highlight');
+				},
+				'onAfterSetNewvalue': function (that, event, container, value) {
+					filterRoomList('#datalist_highlight', value);
+				},
+				'onAfterVirtualKeyboardButton': function (that, event, thisFunction) {
+					if (thisFunction == 'DELETE' || thisFunction == 'CLEAR')
+						filterRoomList('#datalist_highlight');
+				},
+				'keyboardLayout': '<div class="modal-dialog modal-dialog-centered">' +
+						'<div class="modal-content">' +
+							'<table>' +
+								'<tr>' +
+									'<td colspan="4">{INPUTBOX}</td>' +
+								'</tr><tr>' +
+									'<td id="kv7">{7}</td>' +
+									'<td id="kv8">{8}</td>' +
+									'<td id="kv9">{9}</td>' +
+									'<td>{DELETE}</td>' +
+								'</tr><tr>' +
+									'<td id="kv4">{4}</td>' +
+									'<td id="kv5">{5}</td>' +
+									'<td id="kv6">{6}</td>' +
+									'<td>{CLEAR}</td>' +
+								'</tr><tr>' +
+									'<td id="kv1">{1}</td>' +
+									'<td id="kv2">{2}</td>' +
+									'<td id="kv3">{3}</td>' +
+									'<td>{DONE}</td>' +
+								'</tr><tr>' +
+									'<td id="kv0">{0}</td>' +
+									'<td id="kvA">{A}</td>' +
+									'<td id="kvB">{B}</td>' +
+									'<td>{CANCEL}</td>' +
+								'</tr><tr>' +
+									'<td id="kvC">{C}</td>' +
+									'<td></td>' +
+									'<td></td>' +
+									'<td></td>' +
+								'</tr>' +
+							'</table>' +
+						'</div>' +
+					'</div>'
+			});
+		});
+	</script>
+</body>
+</html>

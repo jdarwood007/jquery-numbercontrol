@@ -58,7 +58,7 @@
 			inputParentCss: 'input-group numberControl',
 			inputParent: 'div',
 			inputCss: 'numberControlInput form-control px-1',
-			bindButtonEvents: 'click tap touch touchstart focus',
+			bindButtonEvents: 'click tap touch touchstart',
 			keyboardLanguage: {
 				'UP' : '<span class="oi oi-chevron-top" />',
 				'DOWN' : '<span class="oi oi-chevron-bottom" />',
@@ -82,7 +82,13 @@
 			if (Number.MIN_VALUE == parseFloat(value) && $(container).val() == '')
 				return false;
 
-			if (options.type === 'number')
+			// No Nans.
+			if (options.type !== 'text' && isNaN(value))
+				value = 0;
+
+			if (options.type === 'text')
+				$(container).val(value);
+			else if (options.type === 'number')
 				$(container).val(parseInt(value));
 			else
 				$(container).val(parseFloat(value));
@@ -141,8 +147,8 @@
 			// Some settings we either can pull in from a options, from standard attributes or defaults.
 			var $step = findMinMaxValue(parseFloat(options.step), parseFloat($base.attr('step')), 1);
 			var $percision = precision($step) + 1;
-			var $minValue = findMinMaxValue(options.min, $base.attr('min'), Number.MIN_VALUE);
-			var $maxValue = findMinMaxValue(options.max, $base.attr('max'), Number.MAX_VALUE);
+			var $minValue = findMinMaxValue(options.min, $base.attr('min'), Number.MIN_SAFE_INTEGER);
+			var $maxValue = findMinMaxValue(options.max, $base.attr('max'), Number.MAX_SAFE_INTEGER);
 
 			// Build the parent up. 
 			if (!$($base).parent().is('div') || !$($base).parent().hasClass('numberControlDestoryed')) {
@@ -326,6 +332,8 @@
 							default:
 								if ($(this).attr('data-custom-function'))
 									$(this).attr('data-custom-function')(this, event, thisFunction);
+								else if ($VirtualKeyboardInput.val() == '0' || $VirtualKeyboardInput.val() == '0.000')
+									setNewValue($VirtualKeyboardInput, $(this).attr('data-function'));
 								else
 									setNewValue($VirtualKeyboardInput, $VirtualKeyboardInput.val().toString() + $(this).attr('data-function'));
 						}
