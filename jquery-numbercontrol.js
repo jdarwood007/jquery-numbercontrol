@@ -58,7 +58,7 @@
 			inputParentCss: 'input-group numberControl',
 			inputParent: 'div',
 			inputCss: 'numberControlInput form-control px-1',
-			bindButtonEvents: 'click tap touch touchstart',
+			bindButtonEvents: 'click touchend',
 			keyboardLanguage: {
 				'UP' : '<span class="oi oi-chevron-top" />',
 				'DOWN' : '<span class="oi oi-chevron-bottom" />',
@@ -177,6 +177,7 @@
 			var $decreaseButton = $parent.find('.btn-decrease');
 			$decreaseButton.on(options.bindButtonEvents, function (event) {
 				event.preventDefault();
+				event.stopPropagation();
 
 				if (options.onBeforeClickDecrease !== undefined)
 					options.onBeforeClickDecrease(this, event);
@@ -192,6 +193,7 @@
 			var $increaseButton = $parent.find('.btn-increase');
 			$increaseButton.on(options.bindButtonEvents, function (event) {
 				event.preventDefault();
+				event.stopPropagation();
 
 				if (options.onBeforeClickIncrease !== undefined)
 					options.onBeforeClickIncrease(this, event);
@@ -212,6 +214,7 @@
 					options.onBeforeVirtualKeyboardInitalized(this);
 
 				$base.on(options.bindButtonEvents, function (event) {
+					event.preventDefault();
 					event.stopPropagation();
 
 					if (options.onBeforeVirtualKeyboardOpen !== undefined)
@@ -276,6 +279,7 @@
 					// Bind the virtual Keyboard action.
 					$VirtualKeyboard.find('.numberControlVirtualNumPad').on(options.bindButtonEvents, function(event){						
 						event.preventDefault();
+						event.stopPropagation();
 
 						if (options.debug) console.log('numbercontrl: numberControlVirtualNumPad: Click', event, $base.val(), $VirtualKeyboardInput.val().toString(), $(this).attr('data-function'));
 
