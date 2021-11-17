@@ -80,15 +80,10 @@
 			if (isNaN(parseFloat(number)) !== false)
 				return number;
 
-			let toFixedLength = 0;
-			let str = String(number);
+			let str = String(number),
+				arr = str.split(options.separator);
 
-			// You may add/remove seperator according to your needs
-			let arr = str.split(options.separator);
-			if (arr.length === 2) 
-				toFixedLength = arr[1].length;
-
-			return parseFloat(str).toFixed(toFixedLength);
+			return parseFloat(str).toFixed(arr.length === 2 ? arr[1].length : 0);
 		}
 
 		function setNewValue(container, value)
