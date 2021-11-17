@@ -73,6 +73,24 @@
 			options[option] = methodOrProps[option]
 		}
 
+		// Parse a float with 0s at the end.
+		// Reference: https://stackoverflow.com/questions/4868556/how-do-i-stop-parsefloat-from-stripping-zeroes-to-right-of-decimal
+		function customParseFloat(number)
+		{
+			if (isNaN(parseFloat(number)) !== false)
+				return number;
+
+			let toFixedLength = 0;
+			let str = String(number);
+
+			// You may add/remove seperator according to your needs
+			let arr = str.split(options.separator);
+			if (arr.length === 2) 
+				toFixedLength = arr[1].length;
+
+			return parseFloat(str).toFixed(toFixedLength);
+		}
+
 		function setNewValue(container, value)
 		{
 			if (options.onBeforeSetNewvalue !== undefined)
@@ -90,8 +108,15 @@
 				$(container).val(value);
 			else if (options.type === 'number')
 				$(container).val(parseInt(value));
+			// Handle floats/decmials with 0s at the end.
+			else if ((options.disallowTrailingZero === undefined || options.disallowTrailingZero === false) && value[value.length - 1] == 0)
+				$(container).val(customParseFloat(value));
 			else
 				$(container).val(parseFloat(value));
+
+			// By default, we should trigger a change to the container.
+			if (options.ignoreChangeTrigger === undefined || options.ignoreChangeTrigger === false)
+				$(container).trigger('change');
 
 			if (options.onAfterSetNewvalue !== undefined)
 				options.onAfterSetNewvalue(this, event, container, value);
