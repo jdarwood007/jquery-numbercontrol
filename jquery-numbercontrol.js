@@ -171,11 +171,11 @@
 			var $maxValue = findMinMaxValue(options.max, $base.attr('max'), Number.MAX_SAFE_INTEGER);
 
 			// Build the parent up. 
-			if (!$($base).parent().is('div') || !$($base).parent().hasClass('numberControlDestoryed')) {
+			if (options.inputParent != '' && (!$($base).parent().is('div') || !$($base).parent().hasClass('numberControlDestoryed'))) {
 				$base.wrap('<' + options.inputParent + '></' + options.inputParent + '>');
 			}
 			var $parent = $base.parent(options.parentSelector);
-			$parent.removeClass().addClass(options.inputParentCss);
+			$parent.addClass(options.inputParentCss);
 
 			// Set the base.
 			$base.attr('type', options.type);
@@ -246,7 +246,7 @@
 						$KeyboardLayout = options.keyboardLayout;
 					else
 						$KeyboardLayout = 
-							'<div class="modal-dialog modal-dialog-centered" style="width: 250px;">' +
+							'<div class="modal-dialog modal-dialog-centered m-auto" style="width: 250px;">' +
 								'<div class="modal-content">' +
 									'<table>' +
 										'<tr>' +
@@ -279,7 +279,7 @@
 
 					// Fill out the input.
 					if (typeof options.keyboardControl['INPUTBOX'] === 'undefined')
-						options.keyboardControl['INPUTBOX'] = '<input class="numberControlVirtualNumPad numberControlVirtualNumPadINPUT form-control" type="text" readonly value="{VAL}"/>';
+						options.keyboardControl['INPUTBOX'] = '<input class="numberControlVirtualNumPad numberControlVirtualNumPadINPUT form-control w-100" type="text" readonly value="{VAL}"/>';
 					$KeyboardLayout = $KeyboardLayout.replace('{INPUTBOX}', options.keyboardControl['INPUTBOX'].replace('{VAL}', $base.val()).toString());
 
 					// Fill out all buttons.

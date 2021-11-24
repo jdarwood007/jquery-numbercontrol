@@ -24,6 +24,9 @@
 		<li class="nav-item">
 			<a class="nav-link" data-tab="highlight">Highlight</a>
 		</li>
+		<li class="nav-item">
+			<a class="nav-link" data-tab="noparent">No Parent</a>
+		</li>
 	</ul>
 
 	<div id="content_containers">
@@ -72,6 +75,13 @@
 					<option value="207A">207A</option>
 					<option value="209B">209B</option>
 				</datalist>
+			</div>
+		</div>
+		
+		<!-- No Parent -->
+		<div id="viewbox_noparent" style="display:none;">
+			<div class="col-sm-2">	
+				<input type="numbere" id="numbercontrol_noparent" value="0" min="-1" max="1" />
 			</div>
 		</div>
 	</div>
@@ -134,6 +144,10 @@
 				}
 			});
 
+			// The No parent number controls.
+			$('#numbercontrol_noparent').numbercontrol({
+				'inputParent': ''
+			});
 
 			// Example of how we can do a filtered highlight list for example of a room list.			
 			function filterRoomList(dataselector, value)
